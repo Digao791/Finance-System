@@ -11,6 +11,7 @@ Maven builds, and automated tests.
 - Health endpoint at `GET /`, which returns `Ok`
 - PostgreSQL 18 database configuration
 - JPA validation mode and Flyway PostgreSQL support
+- Flyway transaction schema migration for income and expense records
 - Docker Compose startup for the API and database
 - Maven test and build workflows
 - Automated test-generation and documentation-update/publishing workflows
@@ -27,7 +28,7 @@ Maven builds, and automated tests.
 ## Repository structure
 
 - `src/main/java/` - application source code
-- `src/main/resources/` - Spring configuration
+- `src/main/resources/` - Spring configuration and database migrations
 - `src/test/java/` - Spring context and unit tests
 - `infra/` - API container definitions
 - `.github/workflows/` - CI, test generation, and documentation automation

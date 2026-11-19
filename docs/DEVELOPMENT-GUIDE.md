@@ -34,6 +34,11 @@ Run the Spring application:
 ./mvnw spring-boot:run
 ```
 
+On startup, Flyway applies migrations from
+`src/main/resources/db/migration`. The initial migration,
+`V1__create_transactions.sql`, creates the `transactions` table. Hibernate
+is configured to validate rather than generate the database schema.
+
 The API listens on Spring Boot's default port, `8080`, and is available at
 `http://localhost:8080/`.
 
