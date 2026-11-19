@@ -70,16 +70,20 @@ jobs:
             > .documentation-input/commits.txt
 
       - name: Update documentation
+        shell: bash
         env:
           COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_TOKEN }}
         run: |
-          copilot --agent=project-documentation \
-            --available-tools='view,grep,glob,edit,create' \
-            --allow-tool='read' \
-            --allow-tool='write(README.md),write(docs/PROJECT-HISTORY.md),write(docs/APPLICATION-OVERVIEW.md),write(docs/DEVELOPMENT-GUIDE.md)' \
-            -p "Review this push and update the project documentation." \
-            -s
+          copilot_args=(
+            --agent=project-documentation
             --no-ask-user
+            '--available-tools=view,grep,glob,edit,create,apply_patch'
+            '--allow-tool=read'
+            '--allow-tool=write(README.md),write(docs/PROJECT-HISTORY.md),write(docs/APPLICATION-OVERVIEW.md),write(docs/DEVELOPMENT-GUIDE.md)'
+            --prompt 'Review the Finance System changes and update the documentation files in English.'
+          )
+
+          copilot "${copilot_args[@]}"
 
       - name: Prepare documentation patch
         id: patch
