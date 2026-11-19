@@ -2,6 +2,15 @@
 
 ## 2026-11-19
 
+- Added the transaction application model and REST API. Transactions use
+  `INCOME` or `EXPENSE` types, positive BRL amounts, a required date, and an
+  optional 255-character description.
+- Added transaction request and response DTOs with validation for required
+  fields, positive amounts, numeric precision, and description length.
+- Added a Spring Data JPA transaction repository and service that persist
+  transactions and map them to API responses.
+- Added `POST /api/transactions` to create a transaction and
+  `GET /api/transactions` to list all transactions.
 - Added the initial Flyway migration for financial transactions. The
   `transactions` table stores positive BRL amounts, transaction dates,
   descriptions, and either `INCOME` or `EXPENSE` types.
