@@ -1,0 +1,125 @@
+name: Update project documentation
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      base_sha:
+        description: Optional base commit SHA for the documentation review
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  update-documentation:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install Copilot CLI
+        run: npm install -g @github/copilot
+
+      - name: Prepare repository changes
+        env:
+          BASE_SHA: ${{ github.event.before || inputs.base_sha }}
+        run: |
+          mkdir -p .documentation-input docs
+          base_sha="$BASE_SHA"
+
+          if [[ -n "$base_sha" && ! "$base_sha" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "The base commit must be a full Git SHA."
+            exit 1
+          fi
+
+          if [[ -n "$base_sha" && "$base_sha" != 0000000000000000000000000000000000000000 ]]; then
+            if ! git cat-file -e "${base_sha}^{commit}" 2>/dev/null; then
+              git fetch origin "$base_sha"
+            fi
+          else
+            base_sha="$(git rev-parse "$GITHUB_SHA^" 2>/dev/null)" ||
+              base_sha="$(git hash-object -w -t tree /dev/null)"
+          fi
+
+          git diff "$base_sha" "$GITHUB_SHA" -- > .documentation-input/push.diff
+
+          if [[ "$(git cat-file -t "$base_sha")" == commit ]]; then
+            commit_range="$base_sha..$GITHUB_SHA"
+          else
+            commit_range="$GITHUB_SHA"
+          fi
+
+          git -c log.showSignature=false log --no-merges \
+            --date=format-local:%Y-%m-%d \
+            --format='%h %cd %s' "$commit_range" \
+            > .documentation-input/commits.txt
+        env:
+          BASE_SHA: ${{ github.event.before || inputs.base_sha }}
+          TZ: UTC
+
+      - name: Update documentation
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_TOKEN }}
+        run: |
+          copilot --agent=project-documentation \
+            --available-tools='view,grep,glob,edit,create' \
+            --allow-tool='read' \
+            --allow-tool='write(README.md),write(docs/PROJECT-HISTORY.md),write(docs/APPLICATION-OVERVIEW.md),write(docs/DEVELOPMENT-GUIDE.md)' \
+            -p "Review this push and update the project documentation." \
+            -s
+
+      - name: Prepare documentation patch
+        id: patch
+        run: |
+          documentation=(
+            README.md
+            docs/PROJECT-HISTORY.md
+            docs/APPLICATION-OVERVIEW.md
+            docs/DEVELOPMENT-GUIDE.md
+          )
+
+          for path in "${documentation[@]}"; do
+            if [[ ! -s "$path" || -L "$path" ]]; then
+              echo "Missing, empty, or invalid documentation file: $path"
+              exit 1
+            fi
+          done
+
+          for path in "${documentation[@]:1}"; do
+            if ! grep -Fq "]($path)" README.md; then
+              echo "Missing README link: $path"
+              exit 1
+            fi
+          done
+
+          git add -N -- "${documentation[@]}"
+          git diff --no-ext-diff --binary -- "${documentation[@]}" \
+            > "$RUNNER_TEMP/documentation.patch"
+
+          if [[ -s "$RUNNER_TEMP/documentation.patch" ]]; then
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Documentation is already up to date."
+          fi
+
+      - name: Upload documentation patch
+        if: steps.patch.outputs.has_changes == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentation-patch
+          path: ${{ runner.temp }}/documentation.patch
+          if-no-files-found: error

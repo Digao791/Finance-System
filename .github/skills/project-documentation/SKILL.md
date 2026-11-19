@@ -1,0 +1,54 @@
+---
+name: project-documentation
+description: Keeps project history, application documentation, development instructions, and README links up to date.
+---
+
+# Project documentation
+
+Read `.documentation-input/push.diff` and `.documentation-input/commits.txt`.
+Check the files at the current revision before documenting any change.
+Review the whole repository, including backend, frontend, database,
+tests, infrastructure, CI/CD, and documentation.
+
+## Project history
+
+Maintain `docs/PROJECT-HISTORY.md` with `## YYYY-MM-DD` headings in
+descending order. Use the UTC committer dates supplied by the workflow.
+Summarize meaningful changes for each date in brief bullets that explain
+what changed and why it matters. Consolidate related commits and append
+new bullets to an existing date heading when appropriate.
+
+Preserve historical entries. Skip duplicate bullets, merge-only entries,
+and changes that only refresh these generated documents. On the first run,
+document the supplied commit range and any earlier milestones supported by
+repository evidence. Use commit dates for history, never the workflow run date.
+
+## Application overview
+
+Maintain `docs/APPLICATION-OVERVIEW.md`. Explain the application's purpose,
+its users, the main ticket workflows, and how its key components interact.
+Describe features supported by the current implementation. Update this
+document when application behavior or architecture changes.
+
+## Development guide
+
+Maintain `docs/DEVELOPMENT-GUIDE.md`. Document prerequisites, tool versions
+declared by the project, environment variables, database setup, and commands
+for starting, building, and testing the application. Explain the relevant
+CI/CD tooling. Verify commands and settings against the Maven wrapper,
+`pom.xml`, Compose files, `Jenkinsfile`, and GitHub Actions workflows.
+Use placeholders for credentials.
+
+## README
+
+Maintain a concise project summary, feature list, development tool list,
+and repository structure in `README.md`. Update the relevant section when
+the directory structure, tooling, or integrated features change.
+
+Include this section once and verify that each relative link resolves.
+
+## Documentation
+
+- [Project history](docs/PROJECT-HISTORY.md)
+- [Application overview](docs/APPLICATION-OVERVIEW.md)
+- [Development guide](docs/DEVELOPMENT-GUIDE.md)

@@ -1,0 +1,221 @@
+name: Tests Generation
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/main/java/**'
+
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Test Generation Mode'
+        type: choice
+        required: true
+        default: changes
+        options:
+          - changes
+          - missing
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ai-tests-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  generate-tests:
+    name: Generate Tests ( ${{ matrix.mode }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        mode:
+          - ${{ github.event_name == 'push' && 'changes' || inputs.mode || 'changes' }}
+    
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache:  maven
+      
+      - name: Prepare Files
+        id: prepare
+        shell: bash
+        env:
+          MODE: ${{ matrix.mode }}
+          BEFORE_SHA: ${{ github.event.before }}
+          AFTER_SHA: ${{ github.event.after }}
+        run: |
+          if [ "$MODE" == "changes" ]; then 
+            if [ "${GITHUB_EVENT_NAME}" == "push" ] && 
+                git cat-file -e "${BEFORE_SHA}^{commit}" 2>/dev/null; then
+              git diff --name-only "$BEFORE_SHA" "$AFTER_SHA" \ 
+                -- 'src/main/java/**/*.java' \
+                > changed-files.txt
+            else
+              git diff --name-only HEAD^ HEAD \
+                -- 'src/main/java/**/*.java' \
+                > changed-files.txt
+            fi
+          else
+            find src/main/java -type f -name "*.java" \
+              | sort > changed-files.txt
+          fi
+
+          echo "Filed to analyze:"
+          cat changed-files.txt
+
+          if [ -s changed-files.txt ]; then
+            echo "has_files=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_files=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install Copilot CLI
+        if: steps.prepare.outputs.has_files == 'true'
+        run: npm install -g @github/copilot
+
+      - name: Generate Tests
+        if: steps.prepare.outputs.has_files == 'true'
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_TOKEN }}
+          MODE: ${{ matrix.mode }}
+        run: |
+          copilot \
+            --agent=test-generator \
+            -p "Generate automated tests using mode '$MODE'. 
+                Follow your agent instructions and test-generation skill.
+                Read changed-files.txt." \
+            --allow-tool=write \
+            --allow-tool='shell(./mvnw:*)' \
+            --no-ask-user
+
+      - name: Validate generated files
+        if: steps.prepare.outputs.has_files == 'true'
+        shell: bash
+        run: |
+          if [ -n "$(git diff --name-only)" ]; then
+            echo "Existing tracked files were modified."
+            git diff --name-only
+            exit 1
+          fi
+
+          while IFS= read -r file; do
+            case "$file" in
+              src/test/java/*.java|src/test/java/**/*.java)
+                ;;
+              changed-files.txt)
+                ;;
+              *)
+                echo "Unauthorized file: $file"
+                exit 1
+                ;;
+            esac
+          done < <(git ls-files --others --exclude-standard)
+          rm -f changed-files.txt
+
+      - name: Run maven tests
+        if: steps.prepare.outputs.has_files == 'true'
+        run: |
+          chmod +x mvnw
+          ./mvnw test
+
+      - name: Upload generated tests
+        if: always()
+        uses: actions/upload-artifacts@v4
+        with:
+          name: generated-tests-${{ matrix.mode }}
+          path: |
+            src/test/java
+            target/surefire-reports/
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Package new Tests
+        if: steps.prepare.outputs.has_files == 'true'
+        shell: bash
+        run: |
+          mkdir -p generated
+
+          git ls-files --others --exclude-standard \
+            -- 'src/test/java/**/*.java' \
+            | while IFS= read -r file; do
+                mkdir -p "generated/$(dirname "$file")"
+                cp "$file" "generated/$file"
+              done
+
+      - name: Upload new generated tests for PR
+        if: steps.prepare.outputs.has_files == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-tests-${{ matrix.mode }}
+          path: generated/
+          if-no-files-found: ignore
+          retention-days: 1
+
+  create-pr:
+    name: Create Pull Requests
+    needs: generate-tests
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+
+    strategy:
+      matrix:
+        mode:
+          - ${{ github.event_name == 'push' && 'changes' || inputs.mode || 'changes' }}
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+
+      - name: Download Generated Tests
+        uses: actions/download-artifacts@v4
+        with:
+          name: pr-tests-${{ matrix.mode }}
+          path: .
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          base: main
+          branch: automation/tests-${{ matrix.mode }}
+          delete-branch: true
+          add-paths: src/test/java/**/*.java
+          commit-message: "test: generated automated tests"
+          title: "TEST: AI-GENERATED TESTS (${{ matrix.mode }})"
+          body: |
+            ## Automated test generation
+
+            Generated by the test-generator agent.
+
+            **Mode:** `${{ matrix.mode }}`
+
+            - Java 21
+            - JUnit 5
+            - Spring Boot Test
+            - Maven validation
+
+            Please review the generated tests before merging.
+
+
