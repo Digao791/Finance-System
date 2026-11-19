@@ -84,6 +84,9 @@ the `transactions` table with:
 - `.github/workflows/update-documentation.yml` generates documentation patches
   for pushes to `main` and can publish those patches through a dedicated
   commit-and-push job.
+- `.github/workflows/tests-generation.yml` generates tests for changed Java
+  sources and publishes generated-test artifacts with
+  `actions/upload-artifact@v4`.
 
 ## Current limitations
 

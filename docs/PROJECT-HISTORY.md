@@ -2,6 +2,9 @@
 
 ## 2026-11-19
 
+- Fixed the test-generation workflow's generated-test artifact upload by
+  replacing the invalid `actions/upload-artifacts@v4` action reference with
+  the supported `actions/upload-artifact@v4` action.
 - Added the transaction application model and REST API. Transactions use
   `INCOME` or `EXPENSE` types, positive BRL amounts, a required date, and an
   optional 255-character description.
