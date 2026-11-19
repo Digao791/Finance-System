@@ -2,13 +2,17 @@
 
 ## 2026-11-19
 
+- Reworked the test-generation workflow to check out the exact workflow
+  revision, select `changes` or `missing` mode, and set up Node.js 24 before
+  running GitHub Copilot CLI. Changed-source and repository-wide file lists
+  are now prepared in dedicated steps.
+- Tightened test generation so the workflow rejects modifications to existing
+  or indexed files, accepts only new `*Test.java` files under
+  `src/test/java/`, runs Maven only when tests were generated, and packages
+  validated tests with Maven Surefire reports for a pull request.
 - Updated the test-generator agent and test-generation skill to inspect
   existing coverage, support changed-file and repository-wide modes, and
-  create only distinct new JUnit test classes under `src/test/java/`.
-- Tightened the test-generation workflow so it validates that generated
-  changes are regular Java test files, checks the diff, and runs the Maven
-  test suite after generation. The workflow also preserves the existing
-  test, application, migration, and build files.
+  create distinct JUnit test classes while preserving existing project files.
 - Fixed the test-generation workflow's generated-test artifact upload by
   replacing the invalid `actions/upload-artifacts@v4` action reference with
   the supported `actions/upload-artifact@v4` action.

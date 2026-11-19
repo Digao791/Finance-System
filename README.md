@@ -18,7 +18,8 @@ Flyway migrations, Docker Compose, Maven builds, and automated tests.
 - Docker Compose startup for the API and database
 - Maven test and build workflows
 - Automated test-generation that preserves existing files and uses JUnit
-  test artifacts
+  test artifacts, validates generated tests, runs Maven, and can open a
+  pull request with the new test classes
 - Automated documentation update and publishing workflows
 
 ## Development tools

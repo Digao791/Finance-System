@@ -93,16 +93,23 @@ will need correction before it can package the application successfully.
 The Tests Generation workflow runs for source changes in `main` or manually.
 In `changes` mode it analyzes modified production Java sources; in `missing`
 mode it examines repository-wide coverage gaps. The test-generator agent
-inspects existing tests before creating distinct new JUnit test classes.
-Application code, migrations, build configuration, and existing tests are
-read-only.
+inspects existing tests before creating distinct new JUnit test classes ending
+in `Test`. Application code, migrations, build configuration, and existing
+tests are read-only.
 
-The workflow removes its temporary changed-file list, validates that changes
-are regular `.java` files under `src/test/java/`, and runs
-`git diff --check HEAD --`. It then executes `bash ./mvnw -B test` even when
-the generator creates no new files. Generated tests and Surefire reports are
-uploaded with `actions/upload-artifact@v4`, and new test files are packaged
-for pull-request creation.
+The workflow checks out the exact workflow revision and uses Node.js 24 with
+GitHub Copilot CLI. It prepares a source-file list, generates tests, removes
+the temporary list, and verifies that the Git worktree and index contain no
+existing-file modifications. Only untracked regular `*Test.java` files under
+`src/test/java/` are authorized. If validated tests exist, Java 21 is set up
+and `bash ./mvnw -B test` is run.
+
+Generated tests and Surefire reports are uploaded with
+`actions/upload-artifact@v4`. A separate pull-request job downloads the
+validated tests, copies them into a checkout of `main`, and creates an
+`automation/tests-${MODE}` branch with a pull request. The branch is deleted
+after it is merged or closed. The workflow stops if a test path already exists
+on `main`.
 
 The Update project documentation workflow runs on pushes to `main` and by
 manual dispatch. It compares the push with its base commit, summarizes the

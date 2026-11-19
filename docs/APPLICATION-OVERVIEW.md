@@ -85,12 +85,18 @@ the `transactions` table with:
   for pushes to `main` and can publish those patches through a dedicated
   commit-and-push job.
 - `.github/workflows/tests-generation.yml` generates tests for changed Java
-  sources or searches the repository for coverage gaps. The test-generator
-  agent follows `.github/skills/test-generation/SKILL.md`, preserving existing
-  files and placing additional scenarios in distinct new test classes under
-  `src/test/java/`. The workflow validates generated files and diffs, runs
-  Maven tests, and publishes test and Surefire artifacts with
-  `actions/upload-artifact@v4`.
+  sources or searches the repository for coverage gaps. It checks out the
+  exact workflow revision, uses Node.js 24 for GitHub Copilot CLI, and
+  prepares a changed-file or repository-wide production source list according
+  to the `changes` or `missing` mode.
+- The test-generator agent follows `.github/skills/test-generation/SKILL.md`,
+  preserving existing files and placing additional scenarios in distinct new
+  `*Test.java` classes under `src/test/java/`. The workflow rejects edits to
+  existing or indexed files and unauthorized outputs, runs Maven tests when
+  validated test files exist, and uploads generated tests with Surefire reports.
+- Validated generated tests are downloaded by a dedicated pull-request job,
+  copied into a checkout of `main`, and submitted by
+  `peter-evans/create-pull-request@v8` without overwriting existing tests.
 - `.github/agents/test-generator.agent.md` defines changed-file and
   repository-wide test-generation modes and requires the agent to preserve
   existing project files.
