@@ -2,6 +2,13 @@
 
 ## 2026-11-19
 
+- Updated the test-generator agent and test-generation skill to inspect
+  existing coverage, support changed-file and repository-wide modes, and
+  create only distinct new JUnit test classes under `src/test/java/`.
+- Tightened the test-generation workflow so it validates that generated
+  changes are regular Java test files, checks the diff, and runs the Maven
+  test suite after generation. The workflow also preserves the existing
+  test, application, migration, and build files.
 - Fixed the test-generation workflow's generated-test artifact upload by
   replacing the invalid `actions/upload-artifacts@v4` action reference with
   the supported `actions/upload-artifact@v4` action.
