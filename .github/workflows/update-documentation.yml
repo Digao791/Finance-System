@@ -37,6 +37,7 @@ jobs:
       - name: Prepare repository changes
         env:
           BASE_SHA: ${{ github.event.before || inputs.base_sha }}
+          TZ: UTC
         run: |
           mkdir -p .documentation-input docs
           base_sha="$BASE_SHA"
@@ -67,9 +68,6 @@ jobs:
             --date=format-local:%Y-%m-%d \
             --format='%h %cd %s' "$commit_range" \
             > .documentation-input/commits.txt
-        env:
-          BASE_SHA: ${{ github.event.before || inputs.base_sha }}
-          TZ: UTC
 
       - name: Update documentation
         env:
