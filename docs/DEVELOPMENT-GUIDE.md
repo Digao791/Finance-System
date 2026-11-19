@@ -98,8 +98,10 @@ in `Test`. Application code, migrations, build configuration, and existing
 tests are read-only.
 
 The workflow checks out the exact workflow revision and uses Node.js 24 with
-GitHub Copilot CLI. It prepares a source-file list, generates tests, removes
-the temporary list, and verifies that the Git worktree and index contain no
+GitHub Copilot CLI. Its test-generator agent can use view, grep, glob,
+skill, create, `edit`, and `apply_patch` tools with read and write access.
+The workflow prepares a source-file list, generates tests, removes the
+temporary list, and verifies that the Git worktree and index contain no
 existing-file modifications. Only untracked regular `*Test.java` files under
 `src/test/java/` are authorized. If validated tests exist, Java 21 is set up
 and `bash ./mvnw -B test` is run.
