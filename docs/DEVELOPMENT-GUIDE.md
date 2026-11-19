@@ -92,8 +92,9 @@ prevents this command from resolving a lifecycle phase.
 
 The Tests Generation workflow runs for source changes in `main` or manually.
 It generates tests from changed Java sources, validates generated files,
-runs Maven tests, uploads the results, and opens pull requests containing
-generated tests.
+runs Maven tests, uploads the generated tests and Surefire reports through
+`actions/upload-artifact@v4`, and opens pull requests containing generated
+tests.
 
 The Update project documentation workflow runs on pushes to `main` and by
 manual dispatch. It compares the push with its base commit, summarizes the

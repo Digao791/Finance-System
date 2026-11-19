@@ -17,7 +17,8 @@ Flyway migrations, Docker Compose, Maven builds, and automated tests.
 - Flyway transaction schema migration for income and expense records
 - Docker Compose startup for the API and database
 - Maven test and build workflows
-- Automated test-generation and documentation-update/publishing workflows
+- Automated test-generation with artifact uploads and documentation
+  update/publishing workflows
 
 ## Development tools
 
