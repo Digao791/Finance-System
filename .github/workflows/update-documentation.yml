@@ -18,6 +18,8 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    outputs:
+      has_changes: ${{ steps.patch.outputs.has_changes }}
 
     steps:
       - name: Check out repository
@@ -126,3 +128,43 @@ jobs:
           name: documentation-patch
           path: ${{ runner.temp }}/documentation.patch
           if-no-files-found: error
+
+  publish-documentation:
+    name: Publish documentation to main
+    needs: update-documentation
+    if: github.ref == 'refs/heads/main' && needs.update-documentation.outputs.has_changes == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check out the revision used to generate the patch
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Download documentation patch
+        uses: actions/download-artifact@v4
+        with:
+          name: documentation-patch
+          path: ${{ runner.temp }}/documentation
+
+      - name: Commit and push documentation
+        shell: bash
+        run: |
+          git apply --index \
+            --include=README.md \
+            --include=docs/PROJECT-HISTORY.md \
+            --include=docs/APPLICATION-OVERVIEW.md \
+            --include=docs/DEVELOPMENT-GUIDE.md \
+            "$RUNNER_TEMP/documentation/documentation.patch"
+
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+
+          git -c user.name='github-actions[bot]' \
+            -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+            commit -m 'docs: update Finance System documentation'
+
+          git push origin HEAD:refs/heads/main
