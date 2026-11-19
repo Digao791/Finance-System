@@ -1,31 +1,33 @@
 ---
 name: test-generation
-description: Generate automated tests for changed Java classes.
+description: Adds Java test classes for changed or uncovered Spring Boot behavior.
 ---
 
 # Test Generation Skill
 
-## Objective
+## Scope
 
-Analyze changes introduced into the main branch and
-generate automated tests for the affected Java classes.
+In `changes` mode, use `changed-files.txt` and the available Git diff to
+identify affected behavior. In `missing` mode, identify coverage gaps
+across the repository. In both modes, inspect existing tests first.
 
 ## Rules
 
-1. Analyze the Git diff before generating tests.
-2. Prioritize business logic and service classes.
-3. Use JUnit 5 and Spring Boot Test.
-4. Use Mockito only when dependencies need isolation.
-5. Follow the existing test conventions.
-6. Do not modify production code.
-7. Do not modify database migrations.
-8. Avoid tests that depend on execution order.
-9. Execute ./mvnw test after generating tests.
-10. Never remove existing tests.
+1. Create only new `.java` files under `src/test/java/`.
+2. Preserve all existing files, including existing tests, production code,
+   database migrations, and build configuration.
+3. Prioritize business logic and service classes. Cover relevant success
+   and failure scenarios without duplicating existing assertions.
+4. Follow the project's JUnit and Spring testing conventions. Use Mockito
+   when dependencies need isolation and a Spring test context when the
+   behavior under test requires it.
+5. Keep tests independent of execution order.
+6. When a test class already exists, choose a distinct, descriptive name
+   ending in `Test`, such as `TicketServiceDetailMappingTest`.
+7. Leave Maven execution and Git branch operations to the workflow.
 
 ## Expected output
 
-- New test classes under src/test/java.
-- Tests covering relevant positive and negative scenarios.
-- A summary of the generated tests.
-- A report of any remaining test failures.
+- New Java test classes under `src/test/java/`, when coverage is needed.
+- A short summary of the scenarios added.
+- Any verification limitations, with Maven execution marked as pending.

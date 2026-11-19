@@ -104,35 +104,34 @@ jobs:
             --allow-tool='shell(./mvnw:*)' \
             --no-ask-user
 
-      - name: Validate generated files
-        if: steps.prepare.outputs.has_files == 'true'
+      - name: Validate generated test changes
         shell: bash
         run: |
-          if [ -n "$(git diff --name-only)" ]; then
-            echo "Existing tracked files were modified."
-            git diff --name-only
-            exit 1
-          fi
+          rm -f changed-files.txt
 
-          while IFS= read -r file; do
+          while IFS= read -r -d '' file; do
             case "$file" in
-              src/test/java/*.java|src/test/java/**/*.java)
-                ;;
-              changed-files.txt)
+              src/test/java/*.java)
+                if [[ ! -f "$file" || -L "$file" ]]; then
+                  echo "Test file was deleted or is not a regular file: $file"
+                  exit 1
+                fi
                 ;;
               *)
-                echo "Unauthorized file: $file"
+                echo "Unauthorized change: $file"
                 exit 1
                 ;;
             esac
-          done < <(git ls-files --others --exclude-standard)
-          rm -f changed-files.txt
+          done < <(
+            git diff --no-renames --name-only -z HEAD --
+            git ls-files --others --exclude-standard -z
+          )
 
-      - name: Run maven tests
-        if: steps.prepare.outputs.has_files == 'true'
-        run: |
-          chmod +x mvnw
-          ./mvnw test
+          git diff --check HEAD --
+
+      - name: Run Maven tests
+        shell: bash
+        run: bash ./mvnw -B test
 
       - name: Upload generated tests
         if: always()
