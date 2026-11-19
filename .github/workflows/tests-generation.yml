@@ -136,7 +136,7 @@ jobs:
 
       - name: Upload generated tests
         if: always()
-        uses: actions/upload-artifacts@v4
+        uses: actions/upload-artifact@v4
         with:
           name: generated-tests-${{ matrix.mode }}
           path: |
