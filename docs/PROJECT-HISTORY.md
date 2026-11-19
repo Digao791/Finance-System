@@ -2,6 +2,8 @@
 
 ## 2026-11-19
 
+- Removed the unused Spring Boot application context-load test. This keeps the
+  repository free of a redundant test that did not add coverage.
 - Expanded the test-generation agent's Copilot CLI tool access to include
   `edit` and `apply_patch`, alongside the existing view, search, glob, skill,
   and create tools, enabling the agent to write generated test files through
