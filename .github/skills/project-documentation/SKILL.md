@@ -26,7 +26,7 @@ repository evidence. Use commit dates for history, never the workflow run date.
 ## Application overview
 
 Maintain `docs/APPLICATION-OVERVIEW.md`. Explain the application's purpose,
-its users, the main ticket workflows, and how its key components interact.
+its users, the main workflow, and how its key components interact.
 Describe features supported by the current implementation. Update this
 document when application behavior or architecture changes.
 
@@ -36,7 +36,7 @@ Maintain `docs/DEVELOPMENT-GUIDE.md`. Document prerequisites, tool versions
 declared by the project, environment variables, database setup, and commands
 for starting, building, and testing the application. Explain the relevant
 CI/CD tooling. Verify commands and settings against the Maven wrapper,
-`pom.xml`, Compose files, `Jenkinsfile`, and GitHub Actions workflows.
+`pom.xml`, Compose files, and GitHub Actions workflows.
 Use placeholders for credentials.
 
 ## README

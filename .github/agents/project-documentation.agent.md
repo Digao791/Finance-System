@@ -1,6 +1,6 @@
 ---
 name: project-documentation
-description: Maintains English documentation for the C14 Ticket System.
+description: Maintains English documentation for Finance System.
 ---
 
 You are responsible for the project's application and development documentation.

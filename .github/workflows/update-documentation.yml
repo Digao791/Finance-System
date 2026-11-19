@@ -79,6 +79,7 @@ jobs:
             --allow-tool='write(README.md),write(docs/PROJECT-HISTORY.md),write(docs/APPLICATION-OVERVIEW.md),write(docs/DEVELOPMENT-GUIDE.md)' \
             -p "Review this push and update the project documentation." \
             -s
+            --no-ask-user
 
       - name: Prepare documentation patch
         id: patch
