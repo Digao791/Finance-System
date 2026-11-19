@@ -2,17 +2,16 @@ name: Tests Generation
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
     paths:
       - 'src/main/java/**'
 
   workflow_dispatch:
     inputs:
       mode:
-        description: 'Test Generation Mode'
-        type: choice
+        description: Test generation mode
         required: true
+        type: choice
         default: changes
         options:
           - changes
@@ -25,196 +24,221 @@ concurrency:
   group: ai-tests-${{ github.ref }}
   cancel-in-progress: false
 
+env:
+  MODE: ${{ inputs.mode || 'changes' }}
+
 jobs:
   generate-tests:
-    name: Generate Tests ( ${{ matrix.mode }})
+    name: Generate and validate tests
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
-    strategy:
-      fail-fast: false
-      matrix:
-        mode:
-          - ${{ github.event_name == 'push' && 'changes' || inputs.mode || 'changes' }}
-    
+    outputs:
+      has_tests: ${{ steps.validate.outputs.has_tests }}
+
     steps:
-      - name: Checkout main
+      - name: Check out workflow revision
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ github.sha }}
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '21'
-          cache:  maven
-      
-      - name: Prepare Files
+      - name: Prepare files
         id: prepare
         shell: bash
         env:
-          MODE: ${{ matrix.mode }}
           BEFORE_SHA: ${{ github.event.before }}
-          AFTER_SHA: ${{ github.event.after }}
         run: |
-          if [ "$MODE" == "changes" ]; then 
-            if [ "${GITHUB_EVENT_NAME}" == "push" ] && 
-                git cat-file -e "${BEFORE_SHA}^{commit}" 2>/dev/null; then
-              git diff --name-only "$BEFORE_SHA" "$AFTER_SHA" \ 
-                -- 'src/main/java/**/*.java' \
-                > changed-files.txt
-            else
-              git diff --name-only HEAD^ HEAD \
-                -- 'src/main/java/**/*.java' \
-                > changed-files.txt
-            fi
-          else
-            find src/main/java -type f -name "*.java" \
+          if [[ "$MODE" == "missing" ]]; then
+            find src/main/java -type f -name '*.java' \
               | sort > changed-files.txt
+          else
+            base_sha="$BEFORE_SHA"
+
+            if ! git cat-file -e "${base_sha}^{commit}" 2>/dev/null; then
+              if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]] &&
+                 git rev-parse --verify HEAD^ >/dev/null 2>&1; then
+                base_sha="$(git rev-parse HEAD^)"
+              else
+                base_sha="$(git hash-object -w -t tree /dev/null)"
+              fi
+            fi
+
+            git diff --name-only --diff-filter=ACMR "$base_sha" HEAD \
+              -- ':(glob)src/main/java/**/*.java' > changed-files.txt
           fi
 
-          echo "Filed to analyze:"
+          echo "Files to analyze:"
           cat changed-files.txt
 
-          if [ -s changed-files.txt ]; then
+          if [[ -s changed-files.txt ]]; then
             echo "has_files=true" >> "$GITHUB_OUTPUT"
           else
             echo "has_files=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Set up Node.js
+        if: steps.prepare.outputs.has_files == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
       - name: Install Copilot CLI
         if: steps.prepare.outputs.has_files == 'true'
         run: npm install -g @github/copilot
 
-      - name: Generate Tests
+      - name: Generate tests
         if: steps.prepare.outputs.has_files == 'true'
+        shell: bash
         env:
           COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_TOKEN }}
-          MODE: ${{ matrix.mode }}
         run: |
-          copilot \
-            --agent=test-generator \
-            -p "Generate automated tests using mode '$MODE'. 
-                Follow your agent instructions and test-generation skill.
-                Read changed-files.txt." \
-            --allow-tool=write \
-            --allow-tool='shell(./mvnw:*)' \
+          copilot_args=(
+            --agent=test-generator
             --no-ask-user
+            '--available-tools=view,grep,glob,skill,create'
+            '--allow-tool=read,write'
+            --prompt "Use mode '$MODE' and read changed-files.txt. Create only new Java test files under src/test/java. Treat existing files as read-only. The workflow handles Git and Maven."
+          )
 
-      - name: Validate generated test changes
+          copilot "${copilot_args[@]}"
+
+      - name: Validate and package new tests
+        id: validate
+        if: steps.prepare.outputs.has_files == 'true'
         shell: bash
         run: |
           rm -f changed-files.txt
 
+          if ! git diff --quiet HEAD -- || ! git diff --cached --quiet HEAD --; then
+            echo "Existing files or the Git index were modified."
+            git status --short
+            exit 1
+          fi
+
+          generated="$RUNNER_TEMP/generated-tests"
+          manifest="$RUNNER_TEMP/generated-test-files"
+          mkdir -p "$generated"
+
+          git ls-files --others --exclude-standard -z > "$manifest"
+          has_tests=false
+
           while IFS= read -r -d '' file; do
             case "$file" in
-              src/test/java/*.java)
+              src/test/java/*Test.java)
                 if [[ ! -f "$file" || -L "$file" ]]; then
-                  echo "Test file was deleted or is not a regular file: $file"
+                  echo "Invalid test file: $file"
                   exit 1
                 fi
+
+                cp --parents -- "$file" "$generated/"
+                has_tests=true
                 ;;
               *)
-                echo "Unauthorized change: $file"
+                echo "Unauthorized file: $file"
                 exit 1
                 ;;
             esac
-          done < <(
-            git diff --no-renames --name-only -z HEAD --
-            git ls-files --others --exclude-standard -z
-          )
+          done < "$manifest"
 
-          git diff --check HEAD --
+          echo "has_tests=$has_tests" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Java
+        if: steps.validate.outputs.has_tests == 'true'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
 
       - name: Run Maven tests
+        if: steps.validate.outputs.has_tests == 'true'
         shell: bash
         run: bash ./mvnw -B test
 
-      - name: Upload generated tests
-        if: always()
+      - name: Upload generated tests and Maven reports
+        if: ${{ always() && steps.validate.outputs.has_tests == 'true' }}
         uses: actions/upload-artifact@v4
         with:
-          name: generated-tests-${{ matrix.mode }}
+          name: generated-tests-and-reports
           path: |
-            src/test/java
+            ${{ runner.temp }}/generated-tests/
             target/surefire-reports/
           if-no-files-found: warn
           retention-days: 7
 
-      - name: Package new Tests
-        if: steps.prepare.outputs.has_files == 'true'
-        shell: bash
-        run: |
-          mkdir -p generated
-
-          git ls-files --others --exclude-standard \
-            -- 'src/test/java/**/*.java' \
-            | while IFS= read -r file; do
-                mkdir -p "generated/$(dirname "$file")"
-                cp "$file" "generated/$file"
-              done
-
-      - name: Upload new generated tests for PR
-        if: steps.prepare.outputs.has_files == 'true'
+      - name: Upload validated tests for PR
+        if: steps.validate.outputs.has_tests == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: pr-tests-${{ matrix.mode }}
-          path: generated/
-          if-no-files-found: ignore
+          name: pr-tests
+          path: ${{ runner.temp }}/generated-tests/
+          if-no-files-found: error
           retention-days: 1
 
   create-pr:
-    name: Create Pull Requests
+    name: Create pull request
     needs: generate-tests
+    if: needs.generate-tests.outputs.has_tests == 'true'
     runs-on: ubuntu-latest
 
     permissions:
       contents: write
       pull-requests: write
 
-    strategy:
-      matrix:
-        mode:
-          - ${{ github.event_name == 'push' && 'changes' || inputs.mode || 'changes' }}
-
     steps:
-      - name: Checkout main
+      - name: Check out main
         uses: actions/checkout@v4
         with:
           ref: main
-          persist-credentials: true
+          persist-credentials: false
 
-      - name: Download Generated Tests
-        uses: actions/download-artifacts@v4
+      - name: Download validated tests
+        uses: actions/download-artifact@v4
         with:
-          name: pr-tests-${{ matrix.mode }}
-          path: .
+          name: pr-tests
+          path: ${{ runner.temp }}/generated-tests
 
-      - name: Create Pull Request
+      - name: Copy new tests into the checkout
+        shell: bash
+        run: |
+          generated="$RUNNER_TEMP/generated-tests"
+          manifest="$RUNNER_TEMP/validated-test-files"
+
+          find "$generated/src/test/java" -type f -name '*Test.java' \
+            -print0 > "$manifest"
+
+          while IFS= read -r -d '' file; do
+            target="${file#"$generated"/}"
+
+            if [[ -e "$target" || -L "$target" ]]; then
+              echo "Test already exists on main: $target"
+              exit 1
+            fi
+
+            mkdir -p -- "$(dirname -- "$target")"
+            cp -- "$file" "$target"
+          done < "$manifest"
+
+      - name: Create pull request
         uses: peter-evans/create-pull-request@v8
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ github.token }}
           base: main
-          branch: automation/tests-${{ matrix.mode }}
+          branch: automation/tests-${{ env.MODE }}
           delete-branch: true
-          add-paths: src/test/java/**/*.java
-          commit-message: "test: generated automated tests"
-          title: "TEST: AI-GENERATED TESTS (${{ matrix.mode }})"
+          add-paths: src/test/java/
+          commit-message: 'test: add generated automated tests'
+          title: 'test: add generated tests (${{ env.MODE }})'
           body: |
             ## Automated test generation
 
             Generated by the test-generator agent.
 
-            **Mode:** `${{ matrix.mode }}`
+            **Mode:** `${{ env.MODE }}`
 
-            - Java 21
-            - JUnit 5
-            - Spring Boot Test
-            - Maven validation
+            Maven validation passed on `${{ github.sha }}`.
 
             Please review the generated tests before merging.
-
-
