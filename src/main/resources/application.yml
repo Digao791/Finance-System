@@ -1,14 +1,7 @@
 spring:
   application:
     name: finance-system
-
---- 
-
-spring:
-  config:
-    activate:
-      on-profile: local
-
+ 
   datasource:
     url: jdbc:postgresql://localhost:5432/finance
     username: finance

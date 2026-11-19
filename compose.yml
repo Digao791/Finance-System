@@ -28,7 +28,6 @@ services:
       context: .
       dockerfile: infra/Dockerfile.api
     environment:
-      SPRING_PROFILES_ACTIVE: local
       SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/finance
       SPRING_DATASOURCE_USERNAME: finance
       SPRING_DATASOURCE_PASSWORD: finance
