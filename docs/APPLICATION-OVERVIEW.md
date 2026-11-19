@@ -88,7 +88,9 @@ the `transactions` table with:
   sources or searches the repository for coverage gaps. It checks out the
   exact workflow revision, uses Node.js 24 for GitHub Copilot CLI, and
   prepares a changed-file or repository-wide production source list according
-  to the `changes` or `missing` mode.
+  to the `changes` or `missing` mode. The test-generator session is given
+  view, search, glob, skill, create, `edit`, and `apply_patch` tools, with
+  read and write access.
 - The test-generator agent follows `.github/skills/test-generation/SKILL.md`,
   preserving existing files and placing additional scenarios in distinct new
   `*Test.java` classes under `src/test/java/`. The workflow rejects edits to

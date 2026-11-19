@@ -19,7 +19,9 @@ Flyway migrations, Docker Compose, Maven builds, and automated tests.
 - Maven test and build workflows
 - Automated test-generation that preserves existing files and uses JUnit
   test artifacts, validates generated tests, runs Maven, and can open a
-  pull request with the new test classes
+  pull request with the new test classes. The test-generator session provides
+  editing tools for generating new test files while existing project files
+  remain read-only.
 - Automated documentation update and publishing workflows
 
 ## Development tools

@@ -2,6 +2,10 @@
 
 ## 2026-11-19
 
+- Expanded the test-generation agent's Copilot CLI tool access to include
+  `edit` and `apply_patch`, alongside the existing view, search, glob, skill,
+  and create tools, enabling the agent to write generated test files through
+  the workflow's editing capabilities.
 - Reworked the test-generation workflow to check out the exact workflow
   revision, select `changes` or `missing` mode, and set up Node.js 24 before
   running GitHub Copilot CLI. Changed-source and repository-wide file lists
