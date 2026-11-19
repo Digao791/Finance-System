@@ -85,8 +85,17 @@ the `transactions` table with:
   for pushes to `main` and can publish those patches through a dedicated
   commit-and-push job.
 - `.github/workflows/tests-generation.yml` generates tests for changed Java
-  sources and publishes generated-test artifacts with
+  sources or searches the repository for coverage gaps. The test-generator
+  agent follows `.github/skills/test-generation/SKILL.md`, preserving existing
+  files and placing additional scenarios in distinct new test classes under
+  `src/test/java/`. The workflow validates generated files and diffs, runs
+  Maven tests, and publishes test and Surefire artifacts with
   `actions/upload-artifact@v4`.
+- `.github/agents/test-generator.agent.md` defines changed-file and
+  repository-wide test-generation modes and requires the agent to preserve
+  existing project files.
+- `.github/skills/test-generation/SKILL.md` defines the test-generation scope,
+  conventions, and verification responsibilities used by the agent.
 
 ## Current limitations
 

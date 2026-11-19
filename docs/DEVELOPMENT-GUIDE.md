@@ -87,14 +87,22 @@ Eclipse Temurin Java 21 JRE runs `app.jar`.
 
 The Continuous Integration workflow runs on pushes and pull requests to
 `main`. It sets up Java 21 and runs `mvn --batch-mode test`, then invokes
-Maven with `pacakge`; the build step currently contains a misspelling that
-prevents this command from resolving a lifecycle phase.
+Maven with `pacakge`. This build step currently contains a misspelling and
+will need correction before it can package the application successfully.
 
 The Tests Generation workflow runs for source changes in `main` or manually.
-It generates tests from changed Java sources, validates generated files,
-runs Maven tests, uploads the generated tests and Surefire reports through
-`actions/upload-artifact@v4`, and opens pull requests containing generated
-tests.
+In `changes` mode it analyzes modified production Java sources; in `missing`
+mode it examines repository-wide coverage gaps. The test-generator agent
+inspects existing tests before creating distinct new JUnit test classes.
+Application code, migrations, build configuration, and existing tests are
+read-only.
+
+The workflow removes its temporary changed-file list, validates that changes
+are regular `.java` files under `src/test/java/`, and runs
+`git diff --check HEAD --`. It then executes `bash ./mvnw -B test` even when
+the generator creates no new files. Generated tests and Surefire reports are
+uploaded with `actions/upload-artifact@v4`, and new test files are packaged
+for pull-request creation.
 
 The Update project documentation workflow runs on pushes to `main` and by
 manual dispatch. It compares the push with its base commit, summarizes the

@@ -17,8 +17,9 @@ Flyway migrations, Docker Compose, Maven builds, and automated tests.
 - Flyway transaction schema migration for income and expense records
 - Docker Compose startup for the API and database
 - Maven test and build workflows
-- Automated test-generation with artifact uploads and documentation
-  update/publishing workflows
+- Automated test-generation that preserves existing files and uses JUnit
+  test artifacts
+- Automated documentation update and publishing workflows
 
 ## Development tools
 
@@ -27,6 +28,7 @@ Flyway migrations, Docker Compose, Maven builds, and automated tests.
 - PostgreSQL 18 Alpine
 - Docker and Docker Compose
 - GitHub Actions
+- GitHub Copilot CLI for test and documentation automation
 - Spring Boot, Spring Data JPA, Flyway, Lombok, and JUnit 5
 
 ## Repository structure
@@ -36,6 +38,8 @@ Flyway migrations, Docker Compose, Maven builds, and automated tests.
 - `src/test/java/` - Spring context and unit tests
 - `infra/` - API container definitions
 - `.github/workflows/` - CI, test generation, and documentation automation
+- `.github/agents/` - repository automation agent definitions
+- `.github/skills/` - instructions used by automation agents
 - `compose.yml` - local API and PostgreSQL services
 - `pom.xml` - Maven dependencies and build configuration
 - `docs/` - project documentation
