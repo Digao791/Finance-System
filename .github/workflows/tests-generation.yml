@@ -98,7 +98,7 @@ jobs:
           copilot_args=(
             --agent=test-generator
             --no-ask-user
-            '--available-tools=view,grep,glob,skill,create'
+            '--available-tools=view,grep,glob,skill,create,edit,apply_patch'
             '--allow-tool=read,write'
             --prompt "Use mode '$MODE' and read changed-files.txt. Create only new Java test files under src/test/java. Treat existing files as read-only. The workflow handles Git and Maven."
           )
