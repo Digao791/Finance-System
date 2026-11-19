@@ -2,6 +2,9 @@
 
 ## 2026-11-19
 
+- Added the initial Flyway migration for financial transactions. The
+  `transactions` table stores positive BRL amounts, transaction dates,
+  descriptions, and either `INCOME` or `EXPENSE` types.
 - Added a publishing job to the documentation automation workflow. When
   documentation changes are generated, the workflow applies the patch and
   pushes a documentation commit to `main`.
