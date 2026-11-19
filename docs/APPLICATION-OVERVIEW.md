@@ -4,8 +4,8 @@
 
 Finance System is an early-stage Spring Boot application intended to become a
 platform for managing financial information. The implemented code provides an
-application bootstrap, a simple availability check, and the initial database
-schema for financial transactions.
+application bootstrap, a simple availability check, and REST operations for
+creating and listing financial transactions.
 
 ## Users
 
@@ -24,6 +24,29 @@ GET /
 Response: Ok
 ```
 
+The API exposes transaction operations at `/api/transactions`:
+
+- `POST /api/transactions` accepts a validated transaction and returns the
+  persisted response with HTTP `201 Created`.
+- `GET /api/transactions` returns all persisted transactions.
+
+A create request contains the transaction type, amount, date, and optional
+description:
+
+```json
+{
+  "type": "INCOME",
+  "amount": 1250.50,
+  "transactionDate": "2026-11-19",
+  "description": "Salary"
+}
+```
+
+The amount must be positive and has up to 17 integer digits and two fraction
+digits. Type and transaction date are required, and descriptions are limited
+to 255 characters. Responses include the generated identifier and the currency,
+which is fixed to `BRL`.
+
 The application validates the JPA schema on startup because
 `spring.jpa.hibernate.ddl-auto` is set to `validate`. Flyway is included for
 database migrations. Flyway migration `V1__create_transactions.sql` creates
@@ -35,12 +58,19 @@ the `transactions` table with:
 - A `type` restricted to `INCOME` or `EXPENSE`.
 - A currency limited to `BRL`, with `BRL` as the database default.
 
-No Java entity or REST endpoint for managing transactions is implemented yet.
-
 ## Key components
 
 - `FinanceSystemApplication` bootstraps Spring Boot.
 - `health` is a REST controller mapped to `/` and handles health checks.
+- `TransactionController` exposes create and list operations at
+  `/api/transactions`.
+- `TransactionService` creates and persists transactions and converts entities
+  to response DTOs.
+- `TransactionRepository` provides Spring Data JPA persistence operations.
+- `Transaction` and `TransactionType` map financial records and their
+  `INCOME`/`EXPENSE` values to the database.
+- `CreateTransactionRequest` and `TransactionResponse` define the API input
+  and output shapes.
 - `application.yml` defines the Spring application name and local PostgreSQL
   datasource.
 - `V1__create_transactions.sql` establishes the initial transactions table,
@@ -57,7 +87,6 @@ No Java entity or REST endpoint for managing transactions is implemented yet.
 
 ## Current limitations
 
-No reporting, transaction processing, authentication, user accounts, or
-transaction entity and API implementations are present in the current source
-tree. The only supported financial data operation is the schema migration that
-creates the `transactions` table.
+No reporting, updating or deleting transactions, authentication, or user
+account-specific data isolation are implemented. The current transaction API
+supports creation and listing only.

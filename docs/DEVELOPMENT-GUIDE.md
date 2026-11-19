@@ -3,7 +3,7 @@
 ## Prerequisites
 
 - Java 21
-- Maven via `./mvnw`
+- Maven via `./mvnw` (Maven 3.10.1)
 - PostgreSQL 18, either locally or through Docker Compose
 - Docker and Docker Compose for the containerized API and database
 
@@ -41,6 +41,21 @@ is configured to validate rather than generate the database schema.
 
 The API listens on Spring Boot's default port, `8080`, and is available at
 `http://localhost:8080/`.
+
+Transaction endpoints are available under `http://localhost:8080/api/transactions`.
+Create a transaction with:
+
+```bash
+curl -X POST http://localhost:8080/api/transactions \
+  -H "Content-Type: application/json" \
+  -d '{"type":"INCOME","amount":1250.50,"transactionDate":"2026-11-19","description":"Salary"}'
+```
+
+List transactions with:
+
+```bash
+curl http://localhost:8080/api/transactions
+```
 
 The complete container setup is also available:
 
