@@ -78,4 +78,6 @@ generated tests.
 The Update project documentation workflow runs on pushes to `main` and by
 manual dispatch. It compares the push with its base commit, summarizes the
 changes with GitHub Copilot CLI, and produces a documentation patch for the
-four maintained documentation files.
+four maintained documentation files. A follow-up publishing job downloads
+that patch, applies it to the generated revision, and commits and pushes
+the documentation update to `main` only when the patch contains changes.

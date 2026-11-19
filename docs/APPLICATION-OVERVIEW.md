@@ -40,6 +40,9 @@ database migrations, although no migration files are currently present.
   PostgreSQL, Flyway, Lombok, and test dependencies.
 - `infra/Dockerfile.api` builds the application with Maven and runs the
   resulting JAR in an Eclipse Temurin Java 21 runtime.
+- `.github/workflows/update-documentation.yml` generates documentation patches
+  for pushes to `main` and can publish those patches through a dedicated
+  commit-and-push job.
 
 ## Current limitations
 

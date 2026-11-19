@@ -2,6 +2,9 @@
 
 ## 2026-11-19
 
+- Added a publishing job to the documentation automation workflow. When
+  documentation changes are generated, the workflow applies the patch and
+  pushes a documentation commit to `main`.
 - Added a GitHub Actions job for automated project-documentation updates,
   using the project-documentation agent and Copilot CLI to prepare a patch
   from the push diff.

@@ -13,7 +13,7 @@ Maven builds, and automated tests.
 - JPA validation mode and Flyway PostgreSQL support
 - Docker Compose startup for the API and database
 - Maven test and build workflows
-- Automated test-generation and documentation-update workflows
+- Automated test-generation and documentation-update/publishing workflows
 
 ## Development tools
 
