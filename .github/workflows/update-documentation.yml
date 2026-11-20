@@ -82,7 +82,7 @@ jobs:
             '--available-tools=view,grep,glob,edit,create,apply_patch'
             '--allow-tool=read'
             '--allow-tool=write(README.md),write(docs/PROJECT-HISTORY.md),write(docs/APPLICATION-OVERVIEW.md),write(docs/DEVELOPMENT-GUIDE.md)'
-            --prompt 'Review the Finance System changes and update the documentation files in English.'
+            --prompt 'Decide whether the Finance System diff warrants a documentation update. If it does, update only the affected sections in English. Otherwise, leave all files unchanged and report that no update is required.'
           )
 
           copilot "${copilot_args[@]}"
