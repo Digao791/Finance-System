@@ -37,5 +37,13 @@ services:
       database:
         condition: service_healthy
 
+  web:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.web
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
 volumes:
   finance_postgres_data:
