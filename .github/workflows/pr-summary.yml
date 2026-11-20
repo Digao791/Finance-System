@@ -1,0 +1,110 @@
+name: Summarize pull request
+
+on:
+  pull_request_target:
+    branches: [main]
+    types: [opened, reopened, synchronize, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: pr-summary-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  summarize:
+    if: ${{ !github.event.pull_request.draft }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+
+    steps:
+      - name: Check out trusted base revision
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+
+      - name: Read pull request changes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p .pr-summary-input
+          gh pr diff "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" \
+            > .pr-summary-input/changes.diff
+          gh pr diff "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --name-only \
+            > .pr-summary-input/files.txt
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install Copilot CLI
+        run: npm install -g @github/copilot
+
+      - name: Generate summary
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_TOKEN }}
+        run: |
+          if [[ -s .pr-summary-input/changes.diff ]]; then
+            copilot --agent=pr-summary --no-ask-user --disable-builtin-mcps \
+              --available-tools=view --allow-tool=read --silent \
+              --prompt 'Summarize the Finance System pull request in English.' \
+              > "$RUNNER_TEMP/pr-summary.md"
+          else
+            printf '%s\n' 'No file changes were detected in this pull request.' \
+              > "$RUNNER_TEMP/pr-summary.md"
+          fi
+
+          if ! grep -q '[^[:space:]]' "$RUNNER_TEMP/pr-summary.md"; then
+            echo "The PR summary is empty."
+            exit 1
+          fi
+
+      - name: Publish or update summary comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          current_head="$(gh pr view "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" \
+            --json headRefOid --jq .headRefOid)"
+
+          if [[ "$current_head" != "$PR_HEAD_SHA" ]]; then
+            echo "The pull request advanced. A newer run will summarize it."
+            exit 0
+          fi
+
+          marker='<!-- finance-system-pr-summary -->'
+          comments_url="repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments"
+
+          comment_id="$(gh api --paginate --slurp "$comments_url" |
+            jq -r --arg marker "$marker" '
+              flatten
+              | map(select(
+                  .user.login == "github-actions[bot]"
+                  and (.body | startswith($marker))
+                ))
+              | last | .id // empty
+            ')"
+
+          {
+            printf '%s\n\n' "$marker" '## Pull request summary'
+            cat "$RUNNER_TEMP/pr-summary.md"
+          } > "$RUNNER_TEMP/pr-comment.md"
+
+          jq -n --rawfile body "$RUNNER_TEMP/pr-comment.md" '{body: $body}' \
+            > "$RUNNER_TEMP/pr-comment.json"
+
+          if [[ -n "$comment_id" ]]; then
+            gh api --method PATCH \
+              "repos/$GITHUB_REPOSITORY/issues/comments/$comment_id" \
+              --input "$RUNNER_TEMP/pr-comment.json" --silent
+          else
+            gh api --method POST "$comments_url" \
+              --input "$RUNNER_TEMP/pr-comment.json" --silent
+          fi
