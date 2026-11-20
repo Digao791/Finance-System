@@ -135,6 +135,13 @@ validated tests, copies them into a checkout of `main`, and creates an
 after it is merged or closed. The workflow stops if a test path already exists
 on `main`.
 
+The Pull Request Summary workflow runs for non-draft pull requests targeting
+`main`. It checks out the trusted base revision, obtains the pull request diff,
+sets up Node.js 24, and installs GitHub Copilot CLI. The
+`pr-summary` agent summarizes the change and any test impact in English. The
+workflow verifies that the pull request head has not advanced, then creates or
+updates a bot comment marked with `<!-- finance-system-pr-summary -->`.
+
 The Update project documentation workflow runs on pushes to `main` and by
 manual dispatch. It compares the push with its base commit, summarizes the
 changes with GitHub Copilot CLI, and produces a documentation patch for the

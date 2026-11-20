@@ -91,6 +91,13 @@ the `transactions` table with:
 - `.github/workflows/update-documentation.yml` reviews push diffs for meaningful
   documentation changes, generates patches for only affected sections, and can
   publish those patches through a dedicated commit-and-push job.
+- `.github/workflows/pr-summary.yml` summarizes pull request changes with
+  GitHub Copilot CLI and publishes the English summary as a pull request
+  comment. It runs against the trusted base revision, regenerates the summary
+  when pull request commits change, and updates the existing bot comment.
+- `.github/agents/pr-summary.agent.md` instructs the summary agent to derive
+  the purpose and impact from the pull request diff and to report test changes
+  or test evidence only when available.
 - `.github/workflows/tests-generation.yml` generates tests for changed Java
   sources or searches the repository for coverage gaps. It checks out the
   exact workflow revision, uses Node.js 24 for GitHub Copilot CLI, and

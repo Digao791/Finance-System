@@ -25,6 +25,9 @@ Flyway migrations, Docker Compose, Maven builds, and automated tests.
   pull request with the new test classes. The test-generator session provides
   editing tools for generating new test files while existing project files
   remain read-only.
+- Automated pull request summaries that post an English change summary as a
+  comment on a pull request, updating the existing bot comment when the pull
+  request changes.
 - Automated documentation update and publishing workflows
 
 ## Development tools

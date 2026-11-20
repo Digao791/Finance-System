@@ -2,6 +2,10 @@
 
 ## 2026-11-20
 
+- Added an automated pull request summary workflow and
+  `.github/agents/pr-summary.agent.md`. For non-draft pull requests targeting
+  `main`, it summarizes the diff with GitHub Copilot CLI and creates or updates
+  an English pull request comment.
 - Added transaction update and delete operations with `PUT /api/transactions/{id}`
   and `DELETE /api/transactions/{id}`. Missing transaction identifiers return
   HTTP `404 Not Found`, and successful deletes return HTTP `204 No Content`.
