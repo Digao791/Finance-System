@@ -57,6 +57,23 @@ List transactions with:
 curl http://localhost:8080/api/transactions
 ```
 
+Update a transaction with:
+
+```bash
+curl -X PUT http://localhost:8080/api/transactions/1 \
+  -H "Content-Type: application/json" \
+  -d '{"type":"EXPENSE","amount":42.50,"transactionDate":"2026-11-20","description":"Office supplies"}'
+```
+
+Delete a transaction with:
+
+```bash
+curl -X DELETE http://localhost:8080/api/transactions/1
+```
+
+Unknown transaction identifiers return HTTP `404 Not Found`. Successful
+deletes return HTTP `204 No Content`.
+
 The complete container setup is also available:
 
 ```bash
@@ -121,6 +138,11 @@ on `main`.
 The Update project documentation workflow runs on pushes to `main` and by
 manual dispatch. It compares the push with its base commit, summarizes the
 changes with GitHub Copilot CLI, and produces a documentation patch for the
-four maintained documentation files. A follow-up publishing job downloads
-that patch, applies it to the generated revision, and commits and pushes
-the documentation update to `main` only when the patch contains changes.
+four maintained documentation files only when the resulting repository state
+warrants a meaningful update. The project-documentation skill requires the
+agent to update only affected sections and leave documentation unchanged for
+formatting, whitespace, internal refactoring, routine test changes, and
+changes whose behavior is not supported by the diff. A follow-up publishing
+job downloads that patch, applies it to the generated revision, and commits
+and pushes the documentation update to `main` only when the patch contains
+changes.

@@ -2,6 +2,12 @@
 
 ## 2026-11-20
 
+- Added transaction update and delete operations with `PUT /api/transactions/{id}`
+  and `DELETE /api/transactions/{id}`. Missing transaction identifiers return
+  HTTP `404 Not Found`, and successful deletes return HTTP `204 No Content`.
+- Restricted the automated documentation workflow to meaningful repository
+  changes. It now reviews the push diff and updates only affected documentation
+  sections, leaving documentation unchanged when no update is warranted.
 - Added JUnit coverage for transaction request validation, including required
   fields, amount precision and positivity, and the 255-character description
   limit.
