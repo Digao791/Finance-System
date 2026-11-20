@@ -1,6 +1,8 @@
 package com.project.finance_system.controller;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
@@ -15,8 +17,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.project.finance_system.dto.CreateTransactionRequest;
+import com.project.finance_system.dto.MonthlySummaryResponse;
 import com.project.finance_system.dto.TransactionResponse;
 import com.project.finance_system.services.TransactionService;
 
@@ -44,6 +48,28 @@ public class TransactionController {
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
      ){
         return transactionService.findAll(from, to);
+    }
+
+    @GetMapping ("/summary")
+    public MonthlySummaryResponse summarizeMonth(@RequestParam ("month") String month){
+        if(!month.matches("[0-9]{4}-[0-9]{2}") || month.startsWith("0000")){
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Month must use yyyy-mm format"
+            );
+        }
+
+        YearMonth parsedMonth;
+
+        try{
+            parsedMonth = YearMonth.parse(month);   
+        }catch(DateTimeParseException exception){
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST, "Month must be a valid calendar month"
+            );
+        }
+
+        return transactionService.summarizeMonth(parsedMonth);
     }
 
     @PutMapping ("/{id}")

@@ -1,6 +1,8 @@
 package com.project.finance_system.services;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 
 import org.springframework.data.domain.Sort;
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.project.finance_system.dto.CreateTransactionRequest;
+import com.project.finance_system.dto.MonthlySummaryResponse;
 import com.project.finance_system.dto.TransactionResponse;
 import com.project.finance_system.model.Transaction;
 import com.project.finance_system.repositories.TransactionRepository;
@@ -85,6 +88,25 @@ public class TransactionService {
         }
 
         return toResponse(transactions);
+    }
+
+    public MonthlySummaryResponse summarizeMonth(YearMonth month){
+        LocalDate start = month.atDay(1);
+        LocalDate end = month.plusMonths(1).atDay(1);
+
+        BigDecimal income = BigDecimal.ZERO.setScale(2);
+        BigDecimal expenses = BigDecimal.ZERO.setScale(2);
+
+        for(var result: transactionRepository
+                        .findByTransactionDateGreaterThanEqualAndTransactionDateLessThan(start, end)){
+            switch (result.getType()) {
+                case INCOME -> income = result.getAmount();
+                case EXPENSE -> expenses = result.getAmount();
+            }
+        }
+
+        return new MonthlySummaryResponse(month.toString(),
+                        income, expenses, income.subtract(expenses), "BRL");
     }
 
     private Transaction findRequired(Long id){

@@ -21,5 +21,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     List<Transaction> findByTransactionDateLessThanEqual(
         LocalDate from, Sort sort
     );
+
+    List<Transaction> findByTransactionDateGreaterThanEqualAndTransactionDateLessThan(LocalDate start, LocalDate endExclusive);
+
 }
 
