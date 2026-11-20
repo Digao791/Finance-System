@@ -2,22 +2,29 @@
 
 ## Purpose
 
-Finance System is an early-stage Spring Boot application intended to become a
-platform for managing financial information. The implemented code provides an
-application bootstrap, a simple availability check, and REST operations for
-creating and listing financial transactions.
+Finance System is an early-stage financial management application. It combines
+a Spring Boot REST API with a React web interface for recording and reviewing
+BRL income and expense transactions.
 
 ## Users
 
-The application is designed to support users who need to access financial
-management capabilities through an API. No authentication, authorization,
-user roles, or account-specific workflows are implemented yet.
+The application is designed for users who need to manage financial records
+through a browser or API. No authentication, authorization, user roles, or
+account-specific workflows are implemented yet.
 
 ## Main workflow
 
-The API starts as a Spring Boot application on port `8080` in the Docker
-environment. The local PostgreSQL database supplies the configured datasource.
-Clients can verify availability with:
+The web interface starts on port `3000` in the Docker environment and serves
+the React application through Nginx. The API starts on port `8080`, and Nginx
+proxies `/api/` requests to the API container. The local PostgreSQL database
+supplies the configured datasource.
+
+In the browser, users can switch between transaction and chart views, filter
+records by month, date range, or all dates through today, review income,
+expense, and balance totals, and create, edit, or delete transactions. Settings
+and profile navigation remain placeholders.
+
+Clients can also verify API availability with:
 
 ```text
 GET /
@@ -94,7 +101,17 @@ the `transactions` table with:
 - `V1__create_transactions.sql` establishes the initial transactions table,
   including type, amount, currency, date, and description constraints.
 - `compose.yml` runs PostgreSQL and the API together, with database health
-  checking before the API starts.
+  checking before the API starts, and adds the web service on port `3000`.
+- `frontend/` contains the React 19, TypeScript, and Vite web application. It
+  calls `/api/transactions`, supports month and date-range filtering, shows
+  period totals and a daily chart, and provides transaction create, update,
+  and delete controls.
+- `vite.config.ts` proxies `/api` requests to `http://localhost:8080` during
+  frontend development.
+- `infra/Dockerfile.web` builds the frontend with Node.js 24 and Vite, then
+  serves the static output through Nginx.
+- `infra/nginx.conf` serves the SPA, provides SPA fallback routing, and proxies
+  `/api/` requests to the API container.
 - `pom.xml` declares Java 21, Spring Web MVC, Spring Data JPA, validation,
   PostgreSQL, Flyway, Lombok, test dependencies, and Maven Surefire 3.5.5.
 - `infra/Dockerfile.api` builds the application with Maven and runs the

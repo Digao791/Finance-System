@@ -1,10 +1,10 @@
 # Finance System
 
-Finance System is a Spring Boot foundation for a financial management
-application. The API exposes an availability check and transaction creation,
-listing, and monthly-summary operations. The project is configured for
-PostgreSQL persistence, Flyway migrations, Docker Compose, Maven builds, and
-automated tests.
+Finance System is a financial management application with a Spring Boot API and
+React web interface. The API exposes an availability check and transaction
+creation, listing, update, delete, and monthly-summary operations. The project
+uses PostgreSQL persistence, Flyway migrations, Docker Compose, Maven builds,
+and a Vite frontend.
 
 ## Features
 
@@ -18,7 +18,9 @@ automated tests.
 - PostgreSQL 18 database configuration
 - JPA validation mode and Flyway PostgreSQL support
 - Flyway transaction schema migration for income and expense records
-- Docker Compose startup for the API and database
+- React 19 frontend with transaction management, period filtering, summaries,
+  daily charts, and a containerized Nginx delivery
+- Docker Compose startup for the API, PostgreSQL database, and web frontend
 - Maven test and build workflows
 - JUnit 5 coverage for transaction request validation and transaction service
   creation and listing behavior
@@ -38,6 +40,7 @@ automated tests.
 - Maven, through the Maven Wrapper
 - PostgreSQL 18 Alpine
 - Docker and Docker Compose
+- Node.js 24, npm, React 19, Vite 8, TypeScript 7, Oxlint, and Nginx
 - GitHub Actions
 - GitHub Copilot CLI for test and documentation automation
 - Spring Boot, Spring Data JPA, Flyway, Lombok, and JUnit 5
@@ -48,11 +51,12 @@ automated tests.
 - `src/main/java/` - application source code
 - `src/main/resources/` - Spring configuration and database migrations
 - `src/test/java/` - JUnit test classes and generated test coverage
+- `frontend/` - React, TypeScript, and Vite web application
 - `infra/` - API container definitions
 - `.github/workflows/` - CI, test generation, and documentation automation
 - `.github/agents/` - repository automation agent definitions
 - `.github/skills/` - instructions used by automation agents
-- `compose.yml` - local API and PostgreSQL services
+- `compose.yml` - local API, PostgreSQL, and web services
 - `pom.xml` - Maven dependencies and build configuration
 - `docs/` - project documentation
 

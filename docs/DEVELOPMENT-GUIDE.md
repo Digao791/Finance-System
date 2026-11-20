@@ -5,7 +5,8 @@
 - Java 21
 - Maven via `./mvnw` (Maven 3.10.1)
 - PostgreSQL 18, either locally or through Docker Compose
-- Docker and Docker Compose for the containerized API and database
+- Docker and Docker Compose for the containerized API, database, and web frontend
+- Node.js 24 and npm for the React frontend
 
 ## Initial setup
 
@@ -101,8 +102,34 @@ The complete container setup is also available:
 docker compose up --build
 ```
 
-Docker Compose maps the API to port `8080`, PostgreSQL to port `5432`, and
-uses a persistent volume for database data.
+Docker Compose maps the API to port `8080`, the web frontend to port `3000`,
+PostgreSQL to port `5432`, and uses a persistent volume for database data.
+The web interface is available at `http://localhost:3000`; Nginx proxies API
+requests to the Spring Boot service.
+
+## Frontend development
+
+Install and start the React frontend locally:
+
+```bash
+cd frontend
+npm ci
+npm run dev
+```
+
+Vite serves the frontend in development mode and proxies `/api` requests to
+`http://localhost:8080`, so the Spring application must be running.
+
+Build or lint the frontend with:
+
+```bash
+cd frontend
+npm run build
+npm run lint
+```
+
+The frontend Docker build uses Node.js 24 to run `npm ci` and `npm run build`,
+then copies the Vite output into Nginx.
 
 ## Build and test
 

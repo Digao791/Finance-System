@@ -2,6 +2,11 @@
 
 ## 2026-11-20
 
+- Added a React 19 transaction dashboard and containerized web service. The
+  frontend supports period filtering, BRL income and expense summaries, daily
+  charts, and transaction creation, editing, and deletion through the API.
+  Docker Compose exposes it on port `3000`, and Nginx proxies `/api/` requests
+  to the Spring Boot service.
 - Pinned Maven Surefire 3.5.5 in `pom.xml` for Maven test execution.
 - Added monthly transaction summaries at
   `GET /api/transactions/summary?month=YYYY-MM`. The endpoint validates the
