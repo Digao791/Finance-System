@@ -9,8 +9,8 @@ Flyway migrations, Docker Compose, Maven builds, and automated tests.
 
 - Spring Boot 4.1 application running on Java 21
 - Health endpoint at `GET /`, which returns `Ok`
-- Transaction API for creating, listing, updating, and deleting BRL financial
-  transactions
+- Transaction API for creating, listing with optional date-range filters,
+  updating, and deleting BRL financial transactions
 - JPA transaction entity and repository with `INCOME` and `EXPENSE` types
 - Validated transaction request and response DTOs
 - PostgreSQL 18 database configuration

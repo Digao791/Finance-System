@@ -57,6 +57,18 @@ List transactions with:
 curl http://localhost:8080/api/transactions
 ```
 
+Filter the list by an inclusive transaction-date range with ISO `YYYY-MM-DD`
+values:
+
+```bash
+curl "http://localhost:8080/api/transactions?from=2026-11-01&to=2026-11-20"
+```
+
+Either `from` or `to` can be used alone. Results are ordered by transaction date
+descending, with transaction identifier descending as a tie-breaker. When both
+parameters are present, `from` must be on or before `to`; otherwise the API
+returns HTTP `400 Bad Request`.
+
 Update a transaction with:
 
 ```bash

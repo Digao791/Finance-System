@@ -2,6 +2,10 @@
 
 ## 2026-11-20
 
+- Added optional `from` and `to` date filters to transaction listing. The API
+  now supports inclusive lower-bound, upper-bound, and combined ranges and
+  rejects ranges where `from` is later than `to`, while ordering results by
+  transaction date and identifier descending.
 - Added an automated pull request summary workflow and
   `.github/agents/pr-summary.agent.md`. For non-draft pull requests targeting
   `main`, it summarizes the diff with GitHub Copilot CLI and creates or updates
