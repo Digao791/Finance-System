@@ -69,6 +69,15 @@ descending, with transaction identifier descending as a tie-breaker. When both
 parameters are present, `from` must be on or before `to`; otherwise the API
 returns HTTP `400 Bad Request`.
 
+Request a monthly summary with a valid `YYYY-MM` month:
+
+```bash
+curl "http://localhost:8080/api/transactions/summary?month=2026-11"
+```
+
+The month parameter must contain a valid calendar month. Malformed or invalid
+values return HTTP `400 Bad Request`.
+
 Update a transaction with:
 
 ```bash

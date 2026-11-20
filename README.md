@@ -1,16 +1,18 @@
 # Finance System
 
 Finance System is a Spring Boot foundation for a financial management
-application. The API exposes an availability check and transaction creation
-and listing operations. The project is configured for PostgreSQL persistence,
-Flyway migrations, Docker Compose, Maven builds, and automated tests.
+application. The API exposes an availability check and transaction creation,
+listing, and monthly-summary operations. The project is configured for
+PostgreSQL persistence, Flyway migrations, Docker Compose, Maven builds, and
+automated tests.
 
 ## Features
 
 - Spring Boot 4.1 application running on Java 21
 - Health endpoint at `GET /`, which returns `Ok`
 - Transaction API for creating, listing with optional date-range filters,
-  updating, and deleting BRL financial transactions
+  updating, deleting, and requesting monthly summaries for BRL financial
+  transactions
 - JPA transaction entity and repository with `INCOME` and `EXPENSE` types
 - Validated transaction request and response DTOs
 - PostgreSQL 18 database configuration
