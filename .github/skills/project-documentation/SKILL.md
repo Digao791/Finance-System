@@ -10,6 +10,27 @@ Check the files at the current revision before documenting any change.
 Review the whole repository, including backend, frontend, database,
 tests, infrastructure, CI/CD, and documentation.
 
+## Decide whether to update documentation
+
+Review `.documentation-input/push.diff` before editing any file. Update
+documentation only when the resulting repository state shows a meaningful
+change that the current documentation does not already cover.
+
+- Use the diff and the current implementation as evidence. A commit title,
+  message, or stated intention alone is insufficient.
+- If the diff is empty, leave all documentation files unchanged.
+- Skip changes limited to formatting, whitespace, internal refactoring with
+  unchanged behavior, and routine test changes that leave documented
+  behavior and development procedures unchanged.
+- For attempted fixes, document only the effect supported by the diff.
+  If the intended behavior did not change, leave the docs unchanged.
+  If only diagnostics changed, describe that change only when it matters
+  to a documented workflow. Do not claim the original issue was resolved.
+- Update only the sections affected by the verified change. An actual
+  change to an endpoint, setup command, or CI behavior may qualify.
+- If no update is warranted, print `No documentation changes required.`
+  and finish without creating, editing, or reformatting any files.
+
 ## Project history
 
 Maintain `docs/PROJECT-HISTORY.md` with `## YYYY-MM-DD` headings in
