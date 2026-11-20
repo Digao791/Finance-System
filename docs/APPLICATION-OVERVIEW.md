@@ -29,6 +29,13 @@ The API exposes transaction operations at `/api/transactions`:
 - `POST /api/transactions` accepts a validated transaction and returns the
   persisted response with HTTP `201 Created`.
 - `GET /api/transactions` returns all persisted transactions.
+- `PUT /api/transactions/{id}` validates and replaces the transaction fields
+  and returns the updated response.
+- `DELETE /api/transactions/{id}` removes the transaction and returns
+  HTTP `204 No Content`.
+
+Update and delete requests for an unknown transaction identifier return HTTP
+`404 Not Found`.
 
 A create request contains the transaction type, amount, date, and optional
 description:
@@ -62,10 +69,10 @@ the `transactions` table with:
 
 - `FinanceSystemApplication` bootstraps Spring Boot.
 - `health` is a REST controller mapped to `/` and handles health checks.
-- `TransactionController` exposes create and list operations at
+- `TransactionController` exposes create, list, update, and delete operations at
   `/api/transactions`.
-- `TransactionService` creates and persists transactions and converts entities
-  to response DTOs.
+- `TransactionService` creates, updates, and deletes transactions, converts
+  entities to response DTOs, and rejects unknown identifiers with HTTP `404`.
 - `TransactionRepository` provides Spring Data JPA persistence operations.
 - `Transaction` and `TransactionType` map financial records and their
   `INCOME`/`EXPENSE` values to the database.
@@ -81,9 +88,9 @@ the `transactions` table with:
   PostgreSQL, Flyway, Lombok, and test dependencies.
 - `infra/Dockerfile.api` builds the application with Maven and runs the
   resulting JAR in an Eclipse Temurin Java 21 runtime.
-- `.github/workflows/update-documentation.yml` generates documentation patches
-  for pushes to `main` and can publish those patches through a dedicated
-  commit-and-push job.
+- `.github/workflows/update-documentation.yml` reviews push diffs for meaningful
+  documentation changes, generates patches for only affected sections, and can
+  publish those patches through a dedicated commit-and-push job.
 - `.github/workflows/tests-generation.yml` generates tests for changed Java
   sources or searches the repository for coverage gaps. It checks out the
   exact workflow revision, uses Node.js 24 for GitHub Copilot CLI, and
@@ -116,6 +123,5 @@ the `transactions` table with:
 
 ## Current limitations
 
-No reporting, updating or deleting transactions, authentication, or user
-account-specific data isolation are implemented. The current transaction API
-supports creation and listing only.
+No reporting, authentication, or user account-specific data isolation are
+implemented.
