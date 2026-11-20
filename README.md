@@ -17,6 +17,8 @@ Flyway migrations, Docker Compose, Maven builds, and automated tests.
 - Flyway transaction schema migration for income and expense records
 - Docker Compose startup for the API and database
 - Maven test and build workflows
+- JUnit 5 coverage for transaction request validation and transaction service
+  creation and listing behavior
 - Automated test-generation that preserves existing files and uses JUnit
   test artifacts, validates generated tests, runs Maven, and can open a
   pull request with the new test classes. The test-generator session provides

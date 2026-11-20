@@ -1,5 +1,14 @@
 # Project History
 
+## 2026-11-20
+
+- Added JUnit coverage for transaction request validation, including required
+  fields, amount precision and positivity, and the 255-character description
+  limit.
+- Added transaction service tests for saving and mapping a created transaction,
+  mapping all repository results to responses, and returning an empty response
+  list when no transactions exist.
+
 ## 2026-11-19
 
 - Removed the unused Spring Boot application context-load test. This keeps the

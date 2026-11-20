@@ -107,6 +107,12 @@ the `transactions` table with:
 - The checked-in test suite currently contains no Spring Boot context-load test;
   automated test generation can add focused JUnit test classes without changing
   existing source or test files.
+- `CreateTransactionRequestValidationTest` verifies the maximum supported
+  amount precision, required fields, positive amount constraints, fraction
+  precision, and 255-character description limit.
+- `TransactionServiceTest` verifies transaction persistence and response mapping
+  for creation, maps multiple repository records to API responses, and verifies
+  empty-list behavior.
 
 ## Current limitations
 
