@@ -2,6 +2,10 @@
 
 ## 2026-11-20
 
+- Added monthly transaction summaries at
+  `GET /api/transactions/summary?month=YYYY-MM`. The endpoint validates the
+  month format and calendar value, and returns a monthly response containing
+  the month, income, expense, balance, and BRL currency.
 - Added optional `from` and `to` date filters to transaction listing. The API
   now supports inclusive lower-bound, upper-bound, and combined ranges and
   rejects ranges where `from` is later than `to`, while ordering results by

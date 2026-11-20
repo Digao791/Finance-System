@@ -33,6 +33,10 @@ The API exposes transaction operations at `/api/transactions`:
   `to` query parameters accept ISO dates and restrict results to the inclusive
   date range. Supplying only `from` or only `to` is supported; when both are
   supplied, `from` must not be later than `to`.
+- `GET /api/transactions/summary?month=YYYY-MM` returns a monthly summary.
+  The month must use a valid `yyyy-MM` calendar value; malformed or invalid
+  values return HTTP `400 Bad Request`. The response includes the month,
+  income, expense, balance, and fixed `BRL` currency.
 - `PUT /api/transactions/{id}` validates and replaces the transaction fields
   and returns the updated response.
 - `DELETE /api/transactions/{id}` removes the transaction and returns
@@ -73,17 +77,18 @@ the `transactions` table with:
 
 - `FinanceSystemApplication` bootstraps Spring Boot.
 - `health` is a REST controller mapped to `/` and handles health checks.
-- `TransactionController` exposes create, list, update, and delete operations at
-  `/api/transactions`.
+- `TransactionController` exposes create, list, monthly-summary, update, and
+  delete operations at `/api/transactions`.
 - `TransactionService` creates, updates, and deletes transactions, converts
-  entities to response DTOs, rejects unknown identifiers with HTTP `404`, and
-  filters and sorts transaction listings.
+  entities to response DTOs, rejects unknown identifiers with HTTP `404`,
+  filters and sorts transaction listings, and builds monthly summaries.
 - `TransactionRepository` provides Spring Data JPA persistence operations,
-  including inclusive date-from, date-to, and date-range queries.
+  including inclusive date-from, date-to, and date-range queries, plus a
+  start-inclusive and end-exclusive month query.
 - `Transaction` and `TransactionType` map financial records and their
   `INCOME`/`EXPENSE` values to the database.
-- `CreateTransactionRequest` and `TransactionResponse` define the API input
-  and output shapes.
+- `CreateTransactionRequest`, `TransactionResponse`, and
+  `MonthlySummaryResponse` define the API input and output shapes.
 - `application.yml` defines the Spring application name and local PostgreSQL
   datasource.
 - `V1__create_transactions.sql` establishes the initial transactions table,
