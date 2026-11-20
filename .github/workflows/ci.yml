@@ -42,5 +42,5 @@ jobs:
           cache: maven
           
       - name: Build with maven
-        run : mvn -B pacakge --file pom.xml
+        run : mvn -B package --file pom.xml
 
