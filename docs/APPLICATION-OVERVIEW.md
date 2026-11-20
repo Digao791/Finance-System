@@ -96,7 +96,7 @@ the `transactions` table with:
 - `compose.yml` runs PostgreSQL and the API together, with database health
   checking before the API starts.
 - `pom.xml` declares Java 21, Spring Web MVC, Spring Data JPA, validation,
-  PostgreSQL, Flyway, Lombok, and test dependencies.
+  PostgreSQL, Flyway, Lombok, test dependencies, and Maven Surefire 3.5.5.
 - `infra/Dockerfile.api` builds the application with Maven and runs the
   resulting JAR in an Eclipse Temurin Java 21 runtime.
 - `.github/workflows/update-documentation.yml` reviews push diffs for meaningful

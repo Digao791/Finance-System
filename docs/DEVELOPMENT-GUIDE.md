@@ -106,6 +106,8 @@ uses a persistent volume for database data.
 
 ## Build and test
 
+The Maven build pins Maven Surefire 3.5.5 to run the JUnit 5 test suite.
+
 Run the test suite:
 
 ```bash

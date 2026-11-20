@@ -2,6 +2,7 @@
 
 ## 2026-11-20
 
+- Pinned Maven Surefire 3.5.5 in `pom.xml` for Maven test execution.
 - Added monthly transaction summaries at
   `GET /api/transactions/summary?month=YYYY-MM`. The endpoint validates the
   month format and calendar value, and returns a monthly response containing

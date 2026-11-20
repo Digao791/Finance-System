@@ -41,6 +41,7 @@ automated tests.
 - GitHub Actions
 - GitHub Copilot CLI for test and documentation automation
 - Spring Boot, Spring Data JPA, Flyway, Lombok, and JUnit 5
+- Maven Surefire 3.5.5
 
 ## Repository structure
 
