@@ -74,9 +74,11 @@ Run the test suite:
 ./mvnw test
 ```
 
-The repository does not currently contain a Spring Boot context-load test.
-Additional coverage is added by the automated test-generation workflow, which
-creates separate `*Test.java` classes rather than modifying existing tests.
+The checked-in JUnit tests cover transaction request validation and
+`TransactionService` creation and listing behavior. They verify required fields,
+amount precision and limits, description length, entity-to-response mapping,
+and empty repository results. The automated test-generation workflow may add
+separate `*Test.java` classes rather than modifying existing tests.
 
 Build a package:
 
@@ -90,9 +92,8 @@ Eclipse Temurin Java 21 JRE runs `app.jar`.
 ## CI/CD
 
 The Continuous Integration workflow runs on pushes and pull requests to
-`main`. It sets up Java 21 and runs `mvn --batch-mode test`, then invokes
-Maven with `pacakge`. This build step currently contains a misspelling and
-will need correction before it can package the application successfully.
+`main`. It sets up Java 21, runs `mvn --batch-mode test`, and packages the
+application with `mvn -B package --file pom.xml`.
 
 The Tests Generation workflow runs for source changes in `main` or manually.
 In `changes` mode it analyzes modified production Java sources; in `missing`
