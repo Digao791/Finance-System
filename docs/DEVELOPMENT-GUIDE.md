@@ -74,6 +74,10 @@ Run the test suite:
 ./mvnw test
 ```
 
+The repository does not currently contain a Spring Boot context-load test.
+Additional coverage is added by the automated test-generation workflow, which
+creates separate `*Test.java` classes rather than modifying existing tests.
+
 Build a package:
 
 ```bash

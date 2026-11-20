@@ -104,6 +104,9 @@ the `transactions` table with:
   existing project files.
 - `.github/skills/test-generation/SKILL.md` defines the test-generation scope,
   conventions, and verification responsibilities used by the agent.
+- The checked-in test suite currently contains no Spring Boot context-load test;
+  automated test generation can add focused JUnit test classes without changing
+  existing source or test files.
 
 ## Current limitations
 

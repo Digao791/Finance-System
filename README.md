@@ -38,7 +38,7 @@ Flyway migrations, Docker Compose, Maven builds, and automated tests.
 
 - `src/main/java/` - application source code
 - `src/main/resources/` - Spring configuration and database migrations
-- `src/test/java/` - Spring context and unit tests
+- `src/test/java/` - JUnit test classes and generated test coverage
 - `infra/` - API container definitions
 - `.github/workflows/` - CI, test generation, and documentation automation
 - `.github/agents/` - repository automation agent definitions
