@@ -53,10 +53,10 @@ class TransactionControllerTest {
             LocalDate.of(2026, 11, 20),
             "Lunch"
         ));
-        when(transactionService.findAll()).thenReturn(expected);
+        when(transactionService.findAll(null,null)).thenReturn(expected);
 
-        assertEquals(expected, transactionController.findAll());
-        verify(transactionService).findAll();
+        assertEquals(expected, transactionController.findAll(null, null));
+        verify(transactionService).findAll(null,null);
     }
 
     @Test

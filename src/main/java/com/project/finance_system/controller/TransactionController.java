@@ -1,7 +1,9 @@
 package com.project.finance_system.controller;
 
+import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -34,8 +37,13 @@ public class TransactionController {
     }
 
     @GetMapping 
-    public List<TransactionResponse> findAll(){
-        return transactionService.findAll();
+    public List<TransactionResponse> findAll(
+        @RequestParam(name = "from", required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+        @RequestParam(name = "to", required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
+     ){
+        return transactionService.findAll(from, to);
     }
 
     @PutMapping ("/{id}")
@@ -50,7 +58,5 @@ public class TransactionController {
     public void delete(@PathVariable Long id){
          transactionService.delete(id);
     }
-
-
     
 }
